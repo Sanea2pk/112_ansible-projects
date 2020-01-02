@@ -85,7 +85,7 @@
        dns_domain_name:       112MD.LOCAL
        hostname:              "{{ hostname | upper }}"
        domain_admin_user:     112md.local\Administrator
-       domain_admin_password: Emergency@911
+       domain_admin_password: 
        domain_ou_path:        "{{ ou_path }}"
        state:                 domain
       register:               domain_reboot
