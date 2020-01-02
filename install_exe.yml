@@ -1,0 +1,15 @@
+---
+- name: ====== INSTALL EXE 1803 ======
+  hosts: "{{ host }}"
+
+  vars_prompt:
+  - name: host
+    prompt: Introduceti numele de grup sau host!
+    private: no
+
+  tasks:
+
+  - name: Run the setup.exe installer on multiple servers using the Domain Administrator
+    win_psexec:
+     command: D:\7z1900.exe /i /IACCEPTEULA
+     executable: D:\psexec.exe
