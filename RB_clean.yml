@@ -25,7 +25,7 @@
 #     win_shell:     C:\Users\{{ item }}\AppData\Local\Yandex\YandexBrowser\Application\19.9.3.314\Installer\setup.exe --uninstall --force-uninstall
 #     loop:
 #       - "renat.calancea"
-    - name:          ====== show DIR ======
+    - name:          ====== show Folder ======
       win_shell:     dir
       args:
         chdir:       \\ws-c01-{{ host }}\c$\Users\{{ item }}\Downloads
