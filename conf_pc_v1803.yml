@@ -1,0 +1,151 @@
+---
+- name:                       CONFIGURE FULL 112 WORKSTATIONS OS 1803
+  hosts:                      new_pc
+
+  vars:
+   ws_name:                   Introduceti ws HOSTNAME -> WS-ZZ-YY
+   reg_path:                  HKLM:\System\CurrentControlSet\Control\Terminal Server
+   ou_path:                   "OU=112,OU=Workstations,OU=Moldova Primary,DC=112MD,DC=local"
+   chrome_url:                ftp://10.2.20.110/install/Google Chrome Deploy/Installers/GoogleChromeStandaloneEnterprise64.msi
+   lang_url:                  ftp://10.2.20.110/lp1803.cab
+   shell_lang:                DISM /online /Add-Package /PackagePath:C:\lp1803.cab
+   shell_cmd:                 echo y | gpupdate /force
+
+  vars_prompt:
+  - name:                     hostname
+    prompt:                   "{{ ws_name }}"
+    private:                  no
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+  tasks:
+  - block:                    # ====== DISABLE FIREWALL AND ENABLE RDP ======
+    - name:                   ====== DISABLE FIREWALL ======
+      win_firewall:
+       state:                 disabled
+       profiles:
+       - Domain
+       - Private
+       - Public
+    - name:                   ====== ENABLE RDP ======
+      win_regedit:
+       path:                  "{{ reg_path }}"
+       name:                  fDenyTSConnections
+       data:                  00000000
+       type:                  dword
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+  - name:                     ====== INSTALL MSMQ ======
+    win_optional_feature:
+     name:                    MSMQ-Container
+     state:                   present
+#-  ------------------------------------------------------------------------------
+#-  ------------------------------------------------------------------------------
+  - block:                    # ====== INSTALL APPLICATIONS ======
+    - name:                   ====== VIBER ======
+      win_chocolatey:
+       name:                  viber
+       ignore_checksums:      yes
+       state:                 latest
+
+    - name:                   ====== .NET FRAMEWORK 4.8 && MOZILLA THUNDERBIRD ======
+      win_chocolatey:
+       name:
+       - dotnetfx
+       - thunderbird
+       state:                 latest
+
+    - name:                   ====== INSTALL GOOGLE-CHROME ======
+      win_get_url:            # Copy installer from ftp server to C:/
+       url:                   "{{ chrome_url }}"
+       dest:                  C:\
+       url_username:          Administrator
+       url_password:          Emergency@112
+    - win_package:            # Install Google Chrome
+        path:                 C:\GoogleChromeStandaloneEnterprise64.msi
+        state:                present
+    - win_file:               # Delete instaler from C:/
+        path:                 C:\GoogleChromeStandaloneEnterprise64.msi
+        state:                absent
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+  - block:                    # ====== ADD WORKSTATIONS TO DOMAIN ======
+    - name:                   ====== CHANGE HOSTNAME ======
+      win_hostname:
+       name:                  "{{ hostname | upper }}"
+      register:               hostname_reboot
+
+    - debug:
+       var:                   hostname_reboot
+
+    - name:                   Windows reboot
+      win_reboot:
+      when:                   hostname_reboot.reboot_required
+    - name:                   ====== ADD COMPUTER TO DOMAIN ======
+      win_domain_membership:
+       dns_domain_name:       112MD.LOCAL
+       hostname:              "{{ hostname | upper }}"
+       domain_admin_user:     112md.local\Administrator
+       domain_admin_password: Emergency@911
+       domain_ou_path:        "{{ ou_path }}"
+       state:                 domain
+      register:               domain_reboot
+
+    - name:                   Windows reboot
+      win_reboot:
+      when:                   domain_reboot.reboot_required
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+  - name:                     ====== CHANGE POWER PLAN TO " High Performance " ======
+    win_power_plan:
+     name:                    High performance
+    ignore_errors:            yes
+
+  - name:                     ====== CHANGE POWER PLAN TO " Высокая производительность " ======
+    win_power_plan:
+     name:                    Высокая производительность
+    ignore_errors:            yes
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+  - block:                    # ====== SET WINDOWS LANGUAGE ======
+    - name:                   ====== COPY lp1803.cab TO C:\ ======
+      win_get_url:
+        url:                  "{{ lang_url }}"
+        dest:                 C:\
+        url_username:         Administrator
+        url_password:         Emergency@112
+
+    - name:                   ====== INSTALL EN LANGUAGE ======
+      win_shell:              "{{ shell_lang }}"
+      args:
+        executable:           cmd
+      register:               install_result
+      ignore_errors:          yes
+
+    - debug:
+        var:                  install_result.stdout_lines
+
+    - win_region:
+       format:                en-US
+       location:              152
+       unicode_language:      en-US
+       copy_settings:         yes
+      register:               lang_reboot
+
+    - name:                   Reboot after language set
+      win_reboot:
+      when:                   lang_reboot.restart_required
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+  - name:                     ====== GET GPUPDATE /FORCE ======
+    win_shell:                "{{ shell_cmd }}"
+    args:
+     executable:              cmd
+     msg:                     Restart "{{ hostname | upper }}"
+    register:                 gp_results
+  - debug:
+     var:                     gp_results.stdout_lines
+
+  - name:                     Windows FINAL reboot after GP UPDATE
+    win_reboot:
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
