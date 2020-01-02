@@ -112,7 +112,7 @@
         url:                  "{{ lang_url }}"
         dest:                 C:\
         url_username:         Administrator
-        url_password:         Emergency@112
+        url_password:         
 
     - name:                   ====== INSTALL EN LANGUAGE ======
       win_shell:              "{{ shell_lang }}"
