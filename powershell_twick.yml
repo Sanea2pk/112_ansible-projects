@@ -1,0 +1,79 @@
+---
+- name:                         ====== POWERSHELL TWICK ======
+  win_shell:                    |
+   $Signature = @{
+   	Namespace = "WinAPI"
+   	Name = "GetStr"
+   	Language = "CSharp"
+   	MemberDefinition = @"
+   		[DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+   		public static extern IntPtr GetModuleHandle(string lpModuleName);
+   		[DllImport("user32.dll", CharSet = CharSet.Auto)]
+   		internal static extern int LoadString(IntPtr hInstance, uint uID, StringBuilder lpBuffer, int nBufferMax);
+   		public static string GetString(uint strId)
+   		{
+   			IntPtr intPtr = GetModuleHandle("shell32.dll");
+   			StringBuilder sb = new StringBuilder(255);
+   			LoadString(intPtr, strId, sb, sb.Capacity);
+   			return sb.ToString();
+   		}
+   "@
+   }
+   IF (-not ("WinAPI.GetStr" -as [type]))
+   {
+   	Add-Type @Signature -Using System.Text
+   }
+   $unpin = [WinAPI.GetStr]::GetString(5387)
+   $apps = (New-Object -ComObject Shell.Application).NameSpace("shell:::{4234d49b-0245-4df3-b780-3893943456e1}").Items()
+   $apps | Where-Object -FilterScript {$_.Path -like "Microsoft.MicrosoftEdge*"} | ForEach-Object -Process {$_.Verbs() | Where-Object -FilterScript {$_.Name -eq    $unpin} | ForEach-Object -Process {$_.DoIt()}}
+   $apps | Where-Object -FilterScript {$_.Path -like "Microsoft.WindowsStore*"} | ForEach-Object -Process {$_.Verbs() | Where-Object -FilterScript {$_.Name -eq    $unpin} | ForEach-Object -Process {$_.DoIt()}}
+
+
+   Stop-Process -Name OneDrive -Force -ErrorAction SilentlyContinue
+   Start-Process -FilePath "$env:SystemRoot\SysWOW64\OneDriveSetup.exe" -ArgumentList "/uninstall" -Wait
+   Stop-Process -Name explorer
+   Remove-ItemProperty -Path HKCU:\Environment -Name OneDrive -Force -ErrorAction SilentlyContinue
+   Remove-Item -Path "$env:ProgramData\Microsoft OneDrive" -Recurse -Force -ErrorAction SilentlyContinue
+   Unregister-ScheduledTask -TaskName *OneDrive* -Confirm:$false
+   IF ((Get-ChildItem -Path $env:USERPROFILE\OneDrive -ErrorAction SilentlyContinue | Measure-Object).Count -eq 0)
+   {
+   	Remove-Item -Path $env:USERPROFILE\OneDrive -Recurse -Force -ErrorAction SilentlyContinue
+   }
+   else
+   {
+   	Write-Error "$env:USERPROFILE\OneDrive folder is not empty"
+   }
+   Wait-Process -Name OneDriveSetup -ErrorAction SilentlyContinue
+   Remove-Item -Path $env:LOCALAPPDATA\Microsoft\OneDrive -Recurse -Force -ErrorAction SilentlyContinue
+   $Error.RemoveAt(0)
+
+   $UpdateEnvExplorerAPI = @{
+   	Namespace = "WinAPI"
+   	Name = "UpdateEnvExplorer"
+   	Language = "CSharp"
+   	MemberDefinition = @"
+   		private static readonly IntPtr HWND_BROADCAST = new IntPtr(0xffff);
+   		private const int WM_SETTINGCHANGE = 0x1a;
+   		private const int SMTO_ABORTIFHUNG = 0x0002;
+   		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+   		static extern bool SendNotifyMessage(IntPtr hWnd, uint Msg, IntPtr wParam, string lParam);
+   		[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+   		private static extern IntPtr SendMessageTimeout(IntPtr hWnd, int Msg, IntPtr wParam, string lParam, int fuFlags, int uTimeout, IntPtr lpdwResult);
+   		[DllImport("shell32.dll", CharSet = CharSet.Auto, SetLastError = false)]
+   		private static extern int SHChangeNotify(int eventId, int flags, IntPtr item1, IntPtr item2);
+   		public static void Refresh()
+   		{
+   			// Update desktop icons
+   			SHChangeNotify(0x8000000, 0x1000, IntPtr.Zero, IntPtr.Zero);
+   			// Update environment variables
+   			SendMessageTimeout(HWND_BROADCAST, WM_SETTINGCHANGE, IntPtr.Zero, null, SMTO_ABORTIFHUNG, 100, IntPtr.Zero);
+   			// Update taskbar
+   			SendNotifyMessage(HWND_BROADCAST, WM_SETTINGCHANGE, IntPtr.Zero, "TraySettings");
+   		}
+   "@
+   }
+   IF (-not ("WinAPI.UpdateEnvExplorer" -as [type]))
+   {
+   	Add-Type @UpdateEnvExplorerAPI
+   }
+   [WinAPI.UpdateEnvExplorer]::Refresh()
