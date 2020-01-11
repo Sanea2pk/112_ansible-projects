@@ -1,157 +1,171 @@
 ---
-- name:                       CONFIGURE FULL 112 WORKSTATIONS OS 1803
-  hosts:                      new_pc
+- name:                        CONFIGURE FULL 112 WORKSTATIONS OS 1803
+  hosts:                       new_pc
 
   vars:
-   ws_name:                   Introduceti ws HOSTNAME -> WS-ZZ-YY
-   reg_path:                  HKLM:\System\CurrentControlSet\Control\Terminal Server
-   ou_path:                   "OU=112,OU=Workstations,OU=Moldova Primary,DC=112MD,DC=local"
-   chrome_url:                ftp://10.2.20.110/install/Google Chrome Deploy/Installers/GoogleChromeStandaloneEnterprise64.msi
-   lang_url:                  ftp://10.2.20.110/lp1803.cab
-   shell_lang:                DISM /online /Add-Package /PackagePath:C:\lp1803.cab
-   shell_cmd:                 echo y | gpupdate /force
+   ws_name:                    Introduceti ws HOSTNAME -> WS-ZZ-YY
+   reg_path:                   HKLM:\System\CurrentControlSet\Control\Terminal Server
+   ou_path:                    "OU=112,OU=Workstations,OU=Moldova Primary,DC=112MD,DC=local"
+   chrome_url:                 ftp://10.2.20.110/install/Google Chrome Deploy/Installers/GoogleChromeStandaloneEnterprise64.msi
+   lang_url:                   ftp://10.2.20.110/lp1803.cab
+   shell_lang:                 DISM /online /Add-Package /PackagePath:C:\lp1803.cab
+   shell_cmd:                  echo y | gpupdate /force
+   def_password:               !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          63653065626133356265613633373932346335323662663433323863386633393766376466666532
+          3436623465333562613333383332646536386634643335380a653865663037613732363566666365
+          35383362303765666233636532393363616361386662313938653537653131616431303662383833
+          3765313333643031620a633532303037306233393262656436306538383634646334663430373032
+          3731
+   dc_pass:                    !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          62656135363032396632636263373464656466383532303964326336646539326538343765343830
+          6139656463313632373663373266626538316338333962330a633930363038393261316363633239
+          66316434393130396537363236386233383331396638323337646232313961663039653764356565
+          6335313831346339630a626634373735376361663135643335666265356364346664323564333163
+          3231
+
 
   vars_prompt:
-  - name:                     hostname
-    prompt:                   "{{ ws_name }}"
-    private:                  no
+  - name:                      hostname
+    prompt:                    "{{ ws_name }}"
+    private:                   no
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
   tasks:
-  - block:                    # ====== DISABLE FIREWALL AND ENABLE RDP ======
-    - name:                   ====== DISABLE FIREWALL ======
+  - block:                     # ====== DISABLE FIREWALL AND ENABLE RDP ======
+    - name:                    ====== DISABLE FIREWALL ======
       win_firewall:
-       state:                 disabled
+       state:                  disabled
        profiles:
        - Domain
        - Private
        - Public
-    - name:                   ====== ENABLE RDP ======
+    - name:                    ====== ENABLE RDP ======
       win_regedit:
-       path:                  "{{ reg_path }}"
-       name:                  fDenyTSConnections
-       data:                  00000000
-       type:                  dword
+       path:                   "{{ reg_path }}"
+       name:                   fDenyTSConnections
+       data:                   00000000
+       type:                   dword
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-    - name:                   ====== WINDOWS Regedit TWICK ======
-      include:                regedit_twick.yml
-    - name:                   ====== WINDOWS PS TWICK ======
-      include:                powershell_twick.yml
+    - name:                    ====== WINDOWS Regedit TWICK ======
+      include:                 regedit_twick.yml
+    - name:                    ====== WINDOWS PS TWICK ======
+      include:                 powershell_twick.yml
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-  - name:                     ====== INSTALL MSMQ ======
+  - name:                      ====== INSTALL MSMQ ======
     win_optional_feature:
-     name:                    MSMQ-Container
-     state:                   present
+     name:                     MSMQ-Container
+     state:                    present
 #-  ------------------------------------------------------------------------------
 #-  ------------------------------------------------------------------------------
-  - block:                    # ====== INSTALL APPLICATIONS ======
-    - name:                   ====== VIBER ======
+  - block:                     # ====== INSTALL APPLICATIONS ======
+    - name:                    ====== VIBER ======
       win_chocolatey:
-       name:                  viber
-       ignore_checksums:      yes
-       state:                 latest
+       name:                   viber
+       ignore_checksums:       yes
+       state:                  latest
 
-    - name:                   ====== .NET FRAMEWORK 4.8 && MOZILLA THUNDERBIRD ======
+    - name:                    ====== .NET FRAMEWORK 4.8 && MOZILLA THUNDERBIRD ======
       win_chocolatey:
        name:
        - dotnetfx
        - thunderbird
-       state:                 latest
+       state:                  latest
 
-    - name:                   ====== INSTALL GOOGLE-CHROME ======
-      win_get_url:            # Copy installer from ftp server to C:/
-       url:                   "{{ chrome_url }}"
-       dest:                  C:\
-       url_username:          Administrator
-       url_password:          Emergency@112
-    - win_package:            # Install Google Chrome
-        path:                 C:\GoogleChromeStandaloneEnterprise64.msi
-        state:                present
-    - win_file:               # Delete instaler from C:/
-        path:                 C:\GoogleChromeStandaloneEnterprise64.msi
-        state:                absent
+    - name:                    ====== INSTALL GOOGLE-CHROME ======
+      win_get_url:             # Copy installer from ftp server to C:/
+       url:                    "{{ chrome_url }}"
+       dest:                   C:\
+       url_username:           Administrator
+       url_password:           "{{ def_password }}"
+    - win_package:             # Install Google Chrome
+        path:                  C:\GoogleChromeStandaloneEnterprise64.msi
+        state:                 present
+    - win_file:                # Delete instaler from C:/
+        path:                  C:\GoogleChromeStandaloneEnterprise64.msi
+        state:                 absent
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-  - block:                    # ====== ADD WORKSTATIONS TO DOMAIN ======
-    - name:                   ====== CHANGE HOSTNAME ======
+  - block:                     # ====== ADD WORKSTATIONS TO DOMAIN ======
+    - name:                    ====== CHANGE HOSTNAME ======
       win_hostname:
-       name:                  "{{ hostname | upper }}"
-      register:               hostname_reboot
+       name:                   "{{ hostname | upper }}"
+      register:                hostname_reboot
 
     - debug:
-       var:                   hostname_reboot
+       var:                    hostname_reboot
 
-    - name:                   Windows reboot
+    - name:                    Windows reboot
       win_reboot:
-      when:                   hostname_reboot.reboot_required
-    - name:                   ====== ADD COMPUTER TO DOMAIN ======
+      when:                    hostname_reboot.reboot_required
+    - name:                    ====== ADD COMPUTER TO DOMAIN ======
       win_domain_membership:
-       dns_domain_name:       112MD.LOCAL
-       hostname:              "{{ hostname | upper }}"
-       domain_admin_user:     112md.local\Administrator
-       domain_admin_password: EMG&adm#
-       domain_ou_path:        "{{ ou_path }}"
-       state:                 domain
-      register:               domain_reboot
+       dns_domain_name:        112MD.LOCAL
+       hostname:               "{{ hostname | upper }}"
+       domain_admin_user:      112md.local\Administrator
+       domain_admin_password:  "{{ dc_pass }}"
+       domain_ou_path:         "{{ ou_path }}"
+       state:                  domain
+      register:                domain_reboot
 
-    - name:                   Windows reboot
+    - name:                    Windows reboot
       win_reboot:
-      when:                   domain_reboot.reboot_required
+      when:                    domain_reboot.reboot_required
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-  - name:                     ====== CHANGE POWER PLAN TO " High Performance " ======
+  - name:                      ====== CHANGE POWER PLAN TO " High Performance " ======
     win_power_plan:
-     name:                    High performance
-    ignore_errors:            yes
+     name:                     High performance
+    ignore_errors:             yes
 
-  - name:                     ====== CHANGE POWER PLAN TO " Высокая производительность " ======
+  - name:                      ====== CHANGE POWER PLAN TO " Высокая производительность " ======
     win_power_plan:
-     name:                    Высокая производительность
-    ignore_errors:            yes
+     name:                     Высокая производительность
+    ignore_errors:             yes
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-  - block:                    # ====== SET WINDOWS LANGUAGE ======
-    - name:                   ====== COPY lp1803.cab TO C:\ ======
+  - block:                     # ====== SET WINDOWS LANGUAGE ======
+    - name:                    ====== COPY lp1803.cab TO C:\ ======
       win_get_url:
-        url:                  "{{ lang_url }}"
-        dest:                 C:\
-        url_username:         Administrator
-        url_password:         Emergency@112
-
-    - name:                   ====== INSTALL EN LANGUAGE ======
-      win_shell:              "{{ shell_lang }}"
+        url:                   "{{ lang_url }}"
+        dest:                  C:\
+        url_username:          Administrator
+        url_password:          "{{ def_password }}"
+    - name:                    ====== INSTALL EN LANGUAGE ======
+      win_shell:               "{{ shell_lang }}"
       args:
-        executable:           cmd
-      register:               install_result
-      ignore_errors:          yes
+        executable:            cmd
+      register:                install_result
+      ignore_errors:           yes
 
     - debug:
-        var:                  install_result.stdout_lines
+        var:                   install_result.stdout_lines
 
     - win_region:
-       format:                en-US
-       location:              152
-       unicode_language:      en-US
-       copy_settings:         yes
-      register:               lang_reboot
+       format:                 en-US
+       location:               152
+       unicode_language:       en-US
+       copy_settings:          yes
+      register:                lang_reboot
 
-    - name:                   Reboot after language set
+    - name:                    Reboot after language set
       win_reboot:
-      when:                   lang_reboot.restart_required
+      when:                    lang_reboot.restart_required
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-  - name:                     ====== GET GPUPDATE /FORCE ======
-    win_shell:                "{{ shell_cmd }}"
+  - name:                      ====== GET GPUPDATE /FORCE ======
+    win_shell:                 "{{ shell_cmd }}"
     args:
-     executable:              cmd
-     msg:                     Restart "{{ hostname | upper }}"
-    register:                 gp_results
+     executable:               cmd
+     msg:                      Restart "{{ hostname | upper }}"
+    register:                  gp_results
   - debug:
-     var:                     gp_results.stdout_lines
+     var:                      gp_results.stdout_lines
 
-  - name:                     Windows FINAL reboot after GP UPDATE
+  - name:                      Windows FINAL reboot after GP UPDATE
     win_reboot:
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
