@@ -65,7 +65,7 @@
        url:                   "{{ chrome_url }}"
        dest:                  C:\
        url_username:          Administrator
-       url_password:          *************
+       url_password:          Emergency@112
     - win_package:            # Install Google Chrome
         path:                 C:\GoogleChromeStandaloneEnterprise64.msi
         state:                present
@@ -91,11 +91,7 @@
        dns_domain_name:       112MD.LOCAL
        hostname:              "{{ hostname | upper }}"
        domain_admin_user:     112md.local\Administrator
-<<<<<<< HEAD
        domain_admin_password: EMG&adm#
-=======
-       domain_admin_password: *************
->>>>>>> 2607830fe4d01810b6e3baccc0c1d4fabb82a994
        domain_ou_path:        "{{ ou_path }}"
        state:                 domain
       register:               domain_reboot
@@ -122,11 +118,7 @@
         url:                  "{{ lang_url }}"
         dest:                 C:\
         url_username:         Administrator
-<<<<<<< HEAD
         url_password:         Emergency@112
-=======
-        url_password:         *************
->>>>>>> 2607830fe4d01810b6e3baccc0c1d4fabb82a994
 
     - name:                   ====== INSTALL EN LANGUAGE ======
       win_shell:              "{{ shell_lang }}"
