@@ -34,6 +34,12 @@
        type:                  dword
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
+    - name:                   ====== WINDOWS Regedit TWICK ======
+      include:                regedit_twick.yml
+    - name:                   ====== WINDOWS PS TWICK ======
+      include:                powershell_twick.yml
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
   - name:                     ====== INSTALL MSMQ ======
     win_optional_feature:
      name:                    MSMQ-Container
@@ -85,7 +91,7 @@
        dns_domain_name:       112MD.LOCAL
        hostname:              "{{ hostname | upper }}"
        domain_admin_user:     112md.local\Administrator
-       domain_admin_password: 
+       domain_admin_password: EMG&adm#
        domain_ou_path:        "{{ ou_path }}"
        state:                 domain
       register:               domain_reboot
@@ -112,7 +118,7 @@
         url:                  "{{ lang_url }}"
         dest:                 C:\
         url_username:         Administrator
-        url_password:         
+        url_password:         Emergency@112
 
     - name:                   ====== INSTALL EN LANGUAGE ======
       win_shell:              "{{ shell_lang }}"
