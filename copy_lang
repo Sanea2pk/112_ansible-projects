@@ -1,0 +1,20 @@
+---
+#-------------------------------------------------------------------------------
+#   CONFIGURE FULL 112 WORKSTATIONS OS Version 1803
+#
+#   Copyfile (c) by S.N.U.A.U.112
+#-------------------------------------------------------------------------------
+
+- name:              COPY LANG TO ALL WORKSTATIONS
+  hosts:             new_pc
+
+  vars:
+    lang_url:        ftp://10.2.20.110/lp1803.cab
+
+  tasks:
+  - name:            ====== COPY lp1803.cab TO C:\ ======
+    win_get_url:
+      url:           "{{ lang_url }}"
+      dest:          C:\
+      url_username:  Administrator
+      url_password:  "{{ def_password }}"
