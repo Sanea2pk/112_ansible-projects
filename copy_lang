@@ -2,7 +2,7 @@
 #-------------------------------------------------------------------------------
 #   COPY LANG TO ALL WORKSTATIONS
 #
-#   Copyfile (c) by S.N.U.A.U.112
+#   Copyfile (c) by AGO
 #-------------------------------------------------------------------------------
 
 - name:              COPY LANG TO ALL WORKSTATIONS
