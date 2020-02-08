@@ -12,7 +12,7 @@
    ws_name:                    Introduceti ws HOSTNAME -> WS-ZZ-YY
    reg_path:                   HKLM:\System\CurrentControlSet\Control\Terminal Server
    ou_path:                    "OU=112,OU=Workstations,OU=Moldova Primary,DC=112MD,DC=local"
-#   chrome_url:                 /home/administrator/112_ansible-projects/GoogleChromeStandaloneEnterprise64.msi
+#   chrome_url:                /home/administrator/112_ansible-projects/GoogleChromeStandaloneEnterprise64.msi
    chrome_url:                 ftp://10.1.20.31/GoogleChromeStandaloneEnterprise64.msi
 #   lang_url:                  ftp://10.2.20.110/lp1703.cab
 #   shell_lang:                DISM /online /Add-Package /PackagePath:C:\lp1703.cab
@@ -163,9 +163,9 @@
       when:                    lang_reboot.restart_required
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-    - name: Set timezone
+    - name:                    Set timezone
       win_timezone:
-       timezone: E. Europe Standard Time
+       timezone:               E. Europe Standard Time
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
