@@ -55,7 +55,7 @@
        type:                   dword
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-    - name:                    ====== WINDOWS Regedit TWICK =======
+    - name:                    ====== WINDOWS Regedit TWICK ======
       include:                 regedit_twick.yml
     - name:                    ====== WINDOWS PS TWICK ======
       include:                 powershell_twick.yml
@@ -90,7 +90,7 @@
     - win_package:             # Install Google Chrome
         path:                  C:\GoogleChromeStandaloneEnterprise64.msi
         state:                 present
-    - win_file:                # Delete instaler from C:/
+    - win_file:                # Delete installer from C:/
         path:                  C:\GoogleChromeStandaloneEnterprise64.msi
         state:                 absent
 #-------------------------------------------------------------------------------
