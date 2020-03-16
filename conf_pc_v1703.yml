@@ -75,7 +75,7 @@
        ignore_checksums:       yes
        state:                  latest
 
-    - name:                    ====== .NET FRAMEWORK 4.8 && MOZILLA THUNDERBIRD ======
+    - name:                    ====== dot.NET FRAMEWORK 4.8 && MOZILLA THUNDERBIRD ======
       win_chocolatey:
        name:
        - dotnetfx
