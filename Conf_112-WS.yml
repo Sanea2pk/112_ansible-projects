@@ -1,20 +1,18 @@
 ---
 #-------------------------------------------------------------------------------
-#   CONFIGURE FULL 112 WORKSTATIONS OS Version 1803
+#   CONFIGURE FULL 112 WORKSTATIONS OS Version 1703
 #
 #   Copyfile (c) by AGO
 #-------------------------------------------------------------------------------
 
-- name:                        CONFIGURE FULL 112 WORKSTATIONS OS 1803
+- name:                        CONFIGURE FULL 112 WORKSTATIONS OS 1703
   hosts:                       new_pc
 
   vars:
    ws_name:                    Introduceti ws HOSTNAME -> WS-ZZ-YY
    reg_path:                   HKLM:\System\CurrentControlSet\Control\Terminal Server
    ou_path:                    "OU=112,OU=Workstations,OU=Moldova Primary,DC=112MD,DC=local"
-   chrome_url:                 ftp://10.2.20.110/install/Google Chrome Deploy/Installers/GoogleChromeStandaloneEnterprise64.msi
-   lang_url:                   ftp://10.2.20.110/lp1803.cab
-   shell_lang:                 DISM /online /Add-Package /PackagePath:C:\lp1803.cab
+   chrome_url:                 ftp://file-server/GoogleChromeStandaloneEnterprise64.msi
    shell_cmd:                  echo y | gpupdate /force
    def_password:               !vault |
           $ANSIBLE_VAULT;1.1;AES256
@@ -74,7 +72,7 @@
        ignore_checksums:       yes
        state:                  latest
 
-    - name:                    ====== .NET FRAMEWORK 4.8 && MOZILLA THUNDERBIRD ======
+    - name:                    ====== dot.NET FRAMEWORK 4.8 & MOZILLA THUNDERBIRD ======
       win_chocolatey:
        name:
        - dotnetfx
@@ -90,7 +88,7 @@
     - win_package:             # Install Google Chrome
         path:                  C:\GoogleChromeStandaloneEnterprise64.msi
         state:                 present
-    - win_file:                # Delete installer from C:/
+    - win_file:                # Delete instaler from C:/
         path:                  C:\GoogleChromeStandaloneEnterprise64.msi
         state:                 absent
 #-------------------------------------------------------------------------------
@@ -112,7 +110,7 @@
        dns_domain_name:        112MD.LOCAL
        hostname:               "{{ hostname | upper }}"
        domain_admin_user:      112md.local\Administrator
-       domain_admin_password:  "{{ dc_pass }}"
+       domain_admin_password:  "{{ dc_password }}"
        domain_ou_path:         "{{ ou_path }}"
        state:                  domain
       register:                domain_reboot
@@ -134,22 +132,6 @@
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
   - block:                     # ====== SET WINDOWS LANGUAGE ======
-    - name:                    ====== COPY lp1803.cab TO C:\ ======
-      win_get_url:
-        url:                   "{{ lang_url }}"
-        dest:                  C:\
-        url_username:          Administrator
-        url_password:          "{{ def_password }}"
-    - name:                    ====== INSTALL EN LANGUAGE ======
-      win_shell:               "{{ shell_lang }}"
-      args:
-        executable:            cmd
-      register:                install_result
-      ignore_errors:           yes
-
-    - debug:
-        var:                   install_result.stdout_lines
-
     - win_region:
        format:                 en-US
        location:               152
@@ -162,6 +144,12 @@
       when:                    lang_reboot.restart_required
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
+    - name:                    Set timezone to 'E. Europe Standard Time'
+      win_timezone:
+       timezone:               E. Europe Standard Time
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+
   - name:                      ====== GET GPUPDATE /FORCE ======
     win_shell:                 "{{ shell_cmd }}"
     args:
