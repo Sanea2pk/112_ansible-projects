@@ -36,22 +36,22 @@
 #-------------------------------------------------------------------------------
   tasks:
     - name:       ====== WINDOWS regedit TWICK ======
-      include:    regedit_twick.yml
+      include:    install/regedit_twick.yml
     - name:       ====== WINDOWS PS TWICK ======
-      include:    powershell_twick.yml
+      include:    install/powershell_twick.yml
     - name:       ====== APP INSTALL ======
-      include:
+      include:    install/app_instal.yml
     - name:       ====== ADD PC to DOMAIN ======
-      include:
+      include:    install/domain_add.yml
     - name:       ====== LANGUAGE APPLY ======
-      include:
+      include:    install/language.yml
     - name:       ====== MSMQ INSTALL ======
-      include:
+      include:    install/msmq_install.yml
     - name:       ====== POWER PLAN ======
-      include:
+      include:    install/power_plan.yml
     - name:       ====== RDP and FIREWALL disable ======
-      include:
+      include:    install/rdp_firewall_disable.yml
     - name:       ====== TIMEZONE ======
-      include:
+      include:    install/timezone.yml
     - name:       ====== POLICY and REBOOT ======
-      include:
+      include:    install/update-policy_reboot.yml
