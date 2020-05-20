@@ -17,9 +17,6 @@
    src:                      "{{ chrome_url }}"
    dest:                     C:\
    remote_src:               yes
-  vars:
-   ansible_become_user:      administrator
-   ansible_become_password:  Emergency@112
 - win_package:               # Install Google Chrome
     path:                    C:\GoogleChromeStandaloneEnterprise64.msi
     state:                   present
