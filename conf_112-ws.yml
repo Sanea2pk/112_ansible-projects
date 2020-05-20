@@ -1,0 +1,57 @@
+---
+#-------------------------------------------------------------------------------
+#   CONFIGURE FULL 112 WORKSTATIONS OS Version 1703
+#
+#   Copyfile (c) by AGO
+#-------------------------------------------------------------------------------
+
+- name:           CONFIGURE FULL 112 WORKSTATIONS OS 1703
+  hosts:          new_pc
+
+  vars:
+   ws_name:       Introduceti ws HOSTNAME -> WS-ZZ-YY
+   reg_path:      HKLM:\System\CurrentControlSet\Control\Terminal Server
+   ou_path:       "OU=112,OU=Workstations,OU=Moldova Primary,DC=112MD,DC=local"
+   chrome_url:    ftp://file-server/GoogleChromeStandaloneEnterprise64.msi
+   shell_cmd:     echo y | gpupdate /force
+   def_password:  !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          32353137386166636534326363323234386139346362633234613334326535633535396364386238
+          3137343530366232653132393361613233356635666238650a333332353539633766303364636262
+          36306165396134646666663239613164376331343861626632666131383539336330393631363061
+          6663383063386539640a363334363135313532646664653735643739616363383766613563616563
+          3865
+   dc_password:   !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          62656135363032396632636263373464656466383532303964326336646539326538343765343830
+          6139656463313632373663373266626538316338333962330a633930363038393261316363633239
+          66316434393130396537363236386233383331396638323337646232313961663039653764356565
+          6335313831346339630a626634373735376361663135643335666265356364346664323564333163
+          3231
+  vars_prompt:
+  - name:         hostname
+    prompt:       "{{ ws_name }}"
+    private:      no
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+  tasks:
+    - name:       ====== WINDOWS regedit TWICK ======
+      include:    install/regedit_twick.yml
+    - name:       ====== WINDOWS PS TWICK ======
+      include:    install/powershell_twick.yml
+    - name:       ====== APP INSTALL ======
+      include:    install/app_install.yml
+    - name:       ====== ADD PC to DOMAIN ======
+      include:    install/domain-add.yml
+    - name:       ====== LANGUAGE APPLY ======
+      include:    install/language.yml
+    - name:       ====== MSMQ INSTALL ======
+      include:    install/msmq_install.yml
+    - name:       ====== POWER PLAN ======
+      include:    install/power-plan.yml
+    - name:       ====== RDP and FIREWALL disable ======
+      include:    install/rdp_firewall_disable.yml
+    - name:       ====== TIMEZONE ======
+      include:    install/timezone.yml
+    - name:       ====== POLICY and REBOOT ======
+      include:    install/update-policy_reboot.yml
