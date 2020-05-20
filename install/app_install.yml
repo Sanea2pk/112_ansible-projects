@@ -1,0 +1,26 @@
+---
+- name:               ====== VIBER ======
+  win_chocolatey:
+   name:              viber
+   ignore_checksums:  yes
+   state:             latest
+
+- name:               ====== dot.NET FRAMEWORK 4.8 & MOZILLA THUNDERBIRD ======
+  win_chocolatey:
+   name:
+   - dotnetfx
+   - thunderbird
+   state:             latest
+
+- name:               ====== INSTALL GOOGLE-CHROME ======
+  win_get_url:        # Copy installer from ftp server to C:/
+   url:               "{{ chrome_url }}"
+   dest:              C:\
+   url_username:      Administrator
+   url_password:      "{{ def_password }}"
+- win_package:        # Install Google Chrome
+    path:             C:\GoogleChromeStandaloneEnterprise64.msi
+    state:            present
+- win_file:           # Delete instaler from C:/
+    path:             C:\GoogleChromeStandaloneEnterprise64.msi
+    state:            absent

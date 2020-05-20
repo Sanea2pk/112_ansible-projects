@@ -1,0 +1,12 @@
+---
+- name:         ====== GET GPUPDATE /FORCE ======
+  win_shell:    "{{ shell_cmd }}"
+  args:
+   executable:  cmd
+   msg:         Restart "{{ hostname | upper }}"
+  register:     gp_results
+- debug:
+   var:         gp_results.stdout_lines
+
+- name:         Windows FINAL reboot after GP UPDATE
+  win_reboot:

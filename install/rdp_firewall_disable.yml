@@ -1,0 +1,15 @@
+---
+
+- name:          ====== DISABLE FIREWALL ======
+  win_firewall:
+   state:        disabled
+   profiles:
+   - Domain
+   - Private
+   - Public
+- name:          ====== ENABLE RDP ======
+  win_regedit:
+   path:         "{{ reg_path }}"
+   name:         fDenyTSConnections
+   data:         00000000
+   type:         dword

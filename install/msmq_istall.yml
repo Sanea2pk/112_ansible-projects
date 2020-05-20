@@ -1,0 +1,5 @@
+---
+- name:                  ====== INSTALL MSMQ ======
+  win_optional_feature:
+   name:                 MSMQ-Container
+   state:                present

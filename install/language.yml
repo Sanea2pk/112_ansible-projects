@@ -1,0 +1,11 @@
+---
+- win_region:
+   format:            en-US
+   location:          152
+   unicode_language:  en-US
+   copy_settings:     yes
+  register:           lang_reboot
+
+- name:               Reboot after language set
+  win_reboot:
+  when:               lang_reboot.restart_required

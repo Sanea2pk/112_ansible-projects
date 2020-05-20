@@ -1,0 +1,10 @@
+---
+- name:            ====== CHANGE POWER PLAN TO " High Performance " ======
+  win_power_plan:
+   name:           High performance
+  ignore_errors:   yes
+
+- name:            ====== CHANGE POWER PLAN TO " Высокая производительность " ======
+  win_power_plan:
+   name:           Высокая производительность
+  ignore_errors:   yes
