@@ -12,7 +12,7 @@
    ws_name:       Introduceti ws HOSTNAME -> WS-ZZ-YY
    reg_path:      HKLM:\System\CurrentControlSet\Control\Terminal Server
    ou_path:       "OU=112,OU=Workstations,OU=Moldova Primary,DC=112MD,DC=local"
-   chrome_url:    ftp://dc01//GoogleChromeStandaloneEnterprise64.msi
+   chrome_url:    /home/administrator/112_ansible-projects/app
    shell_cmd:     echo y | gpupdate /force
    def_password:  !vault |
           $ANSIBLE_VAULT;1.1;AES256
