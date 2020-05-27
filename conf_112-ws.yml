@@ -9,7 +9,7 @@
   hosts:          new_pc
 
   vars:
-   ws_name:       Introduceti ws HOSTNAME -> WS-ZZ-YY
+#   ws_name:      Introduceti ws HOSTNAME -> WS-ZZ-YY
    reg_path:      HKLM:\System\CurrentControlSet\Control\Terminal Server
    ou_path:       "OU=112,OU=Workstations,OU=Moldova Primary,DC=112MD,DC=local"
    chrome_url:    /home/administrator/112_ansible-projects/app/GoogleChromeStandaloneEnterprise64.msi
@@ -28,10 +28,10 @@
           66316434393130396537363236386233383331396638323337646232313961663039653764356565
           6335313831346339630a626634373735376361663135643335666265356364346664323564333163
           3231
-  vars_prompt:
-  - name:         hostname
-    prompt:       "{{ ws_name }}"
-    private:      no
+#  vars_prompt:
+#  - name:        hostname
+#    prompt:      "{{ ws_name }}"
+#    private:     no
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
   tasks:
